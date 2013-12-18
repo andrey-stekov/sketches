@@ -110,6 +110,20 @@ class CollectionParser(MyHTMLParser):
                     self.__title = None
 
 
+class InfoPageParser(MyHTMLParser):
+    def __init__(self):
+        MyHTMLParser.__init__(self)
+        self.pages = []
+
+    def handle__starttag(self, name, attrs, stack):
+        if len(stack) > 6:
+            elem = stack[len(stack) - 6]
+            if elem.name == 'div' and 'class' in elem.attrs:
+                if elem.attrs['class'] == 'gray toc' and name == 'a' \
+                        and 'href' in attrs:
+                        self.pages.append(attrs['href'])
+
+
 class ComicDAO:
     def __init__(self, dbfile):
         self.__conn = lite.connect(dbfile)
@@ -151,7 +165,13 @@ class ComicDAO:
         curr.execute('SELECT * FROM STRIPS WHERE COMICS_ID = ?', comics_id)
         rows = curr.fetchall()
         curr.close()
-        return rows
+
+        strips = {}
+
+        for row in rows:
+            strips[row[3]] = row
+
+        return strips
 
     def finish(self):
         self.__conn.close()
@@ -184,17 +204,27 @@ class Spider:
             ind += 1
             print(str(ind) + ') ' + title)
 
-    def process_comic(self, index):
+    def process_comic(self, ind, folder):
         dao = ComicDAO(self.__metadata_file)
         index = self.__parse_collection()
-        title = index.titles[index]
-        page_url = index.pages[title]
-        
+        title = index.titles[ind - 1]
+        info_page_url = index.pages[title]
+        url = self.__base_url + info_page_url
+        parser = self.__parse_page(url, InfoPageParser())
+        dest_folder = os.path.normpath(folder + os.path.sep + title)
+
+        if not os.path.exists(dest_folder):
+            os.makedirs(dest_folder)
+
+        print title
+        print 'Pages count: ' + str(len(parser.pages))
+        print 'Folder: ' + dest_folder
 
     class CollectionIndex:
-        def __init(self, pages, titles):
+        def __init__(self, pages, titles):
             self.pages = pages
             self.titles = titles
+
 
 def main():
     SITE_URL = 'http://comicsia.ru/'
@@ -202,9 +232,13 @@ def main():
 
     spider = Spider(SITE_URL, DATABASE_FILE)
 
-    if len(sys.argv) == 1:
+    argc = len(sys.argv)
+    if argc == 1:
         spider.process_collection()
-
+    elif argc == 2:
+        spider.process_comic(int(sys.argv[1]), os.path.dirname(os.path.realpath(__file__)))
+    elif argc == 3:
+        spider.process_comic(int(sys.argv[1]), os.path.normpath(sys.argv[2]))
 
 if __name__ == '__main__':
     main()
