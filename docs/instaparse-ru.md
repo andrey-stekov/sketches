@@ -39,10 +39,9 @@ Instaparse требует Clojure версии 1.5.1 либо более поз�
 	A = 'a'+
 	B = 'b'+
 
-This looks for alternating runs of 'a' followed by runs of 'b'.  So for example "aaaaabbaaabbb" satisfies this grammar.  On the other hand,
-"aaabbbbaa" does not (because the grammar specifies that each run of 'a' must be followed by a run of 'b').
+Данная грамматика описывает последовательность специальных групп символов, соответствующих следующему описанию: символ 'a' повторяется один или более раз, вслед за ним следует символ 'b' один или более раз. К примеру последовательность "aaaaabbaaabbb" может быть описана данной грамматикой, а последовательность "aaabbbbaa" - нет (поскольку последние два символа 'a' не имеют ни одного соответствующего им символа 'b').
 
-With instaparse, turning this grammar into an executable parser is as simple as typing the grammar in:
+Используя instaparse, вы сможете построить рабочий парсер непосредственно по этому описанию:
 
 	(def as-and-bs
 	  (insta/parser
@@ -56,15 +55,14 @@ With instaparse, turning this grammar into an executable parser is as simple as 
 	 [:AB [:A "a" "a" "a" "a" "a"] [:B "b" "b" "b"]]
 	 [:AB [:A "a" "a" "a" "a"] [:B "b" "b"]]]
 
-At this point, if you know EBNF notation for context-free grammars, you probably know enough to dive in and start playing around.  However, instaparse is rich with features, so if you want to know the full scope of what it can do, read on...
 
-## Tutorial
+Таким образом зная EBNF-нотацию для контекстно свободных грамматик вы сможете построить парсер удобным для вас способом.
 
-### Notation
+## Руководство
 
-Instaparse supports most of the common notations for context-free grammars.  For example, a popular alternative to `*` is to surround the term with curly braces `{}`, and a popular alternative to `?` is to surround the term with square brackets `[]`.  Rules can be specified with `=`, `:`, `:=`, or `::=`.  Rules can optionally end with `;`.  Instaparse is very flexible in terms of how you use whitespace (as in Clojure, `,` is treated as whitespace) and you can liberally use parentheses for grouping.  Terminal strings can be enclosed in either single quotes or double quotes (however, since you are writing the grammar specification inside of a Clojure double-quoted string, any use of double-quotes would have to be escaped, therefore single-quotes are easier to read). Newlines are optional; you can put the entire grammar on one line if you desire.  In fact, all these notations can be mixed up in the same specification if you want.
+### Примечание
 
-So here is an equally valid (but messier) way to write out the exact same grammar, just to illustrate the flexibility that you have:
+Instaparse поддерживает основыне нотации для описания контекстно-свободных грамматик. Вы можете свободно комбинировать их однако это не очень разумная практика. К примеру правила могут быть определены при помощи операторов `=`, `:`, `:=` или `::=`. Однако смешивая их вы можете получить трудночитаемое непотребство (смотри следующий пример):
 
 	(def as-and-bs-alternative
 	  (insta/parser
@@ -73,7 +71,7 @@ So here is an equally valid (but messier) way to write out the exact same gramma
 	     A : \"a\" + ;
 	     B ='b' + ;"))
 
-Note that regardless of the notation you use in your specification, when you evaluate the parser at the REPL, the rules will be pretty-printed:
+Примечание, при распечатки скомпилированной грамматики она будет приведена к единому виду:
 
 	=> as-and-bs-alternative
 	S = AB*
@@ -81,22 +79,22 @@ Note that regardless of the notation you use in your specification, when you eva
 	A = "a"+
 	B = "b"+
 
-Here's a quick guide to the syntax for defining context-free grammars:
+Ниже приведена шпаргалка основных синтаксических конструкций для описания грамматик:
 
 <table>
-<tr><th>Category</th><th>Notations</th><th>Example</th></tr>
-<tr><td>Rule</td><td>: := ::= =</td><td>S = A</td></tr>
-<tr><td>End of rule</td><td>; . (optional)</td><td>S = A;</td></tr>
-<tr><td>Alternation</td><td>|</td><td>A | B</td></tr>
-<tr><td>Concatenation</td><td>whitespace or ,</td><td>A B</td></tr>
-<tr><td>Grouping</td><td>()</td><td>(A | B) C</td></tr>
-<tr><td>Optional</td><td>? []</td><td>A? [A]</td></tr>
-<tr><td>One or more</td><td>+</td><td>A+</td></tr>
-<tr><td>Zero or more</td><td>* {}</td><td>A* {A}</td></tr>
-<tr><td>String terminal</td><td>"" ''</td><td>'a' "a"</td></tr>
-<tr><td>Regex terminal</td><td>#"" #''</td><td>#'a' #"a"</td></tr>
-<tr><td>Epsilon</td><td>Epsilon epsilon EPSILON eps &#949; "" ''</td><td>S = 'a' S | Epsilon</td></tr>
-<tr><td>Comment</td><td>(* *)</td><td>(* This is a comment *)</td></tr>
+<tr><th>Категория</th><th>Нотация</th><th>Пример</th></tr>
+<tr><td>Объявление правила</td><td>: := ::= =</td><td>S = A</td></tr>
+<tr><td>Окончание правила</td><td>; . (optional)</td><td>S = A;</td></tr>
+<tr><td>Альтернатива</td><td>|</td><td>A | B</td></tr>
+<tr><td>Конкатенация</td><td>whitespace or ,</td><td>A B</td></tr>
+<tr><td>Групировка</td><td>()</td><td>(A | B) C</td></tr>
+<tr><td>Опциональность</td><td>? []</td><td>A? [A]</td></tr>
+<tr><td>Повторение один или более раз</td><td>+</td><td>A+</td></tr>
+<tr><td>Повторение ноль или более раз</td><td>* {}</td><td>A* {A}</td></tr>
+<tr><td>Строковой литерал</td><td>"" ''</td><td>'a' "a"</td></tr>
+<tr><td>Литерал описаный при помощи регулярного выражения</td><td>#"" #''</td><td>#'a' #"a"</td></tr>
+<tr><td>Эпсилон</td><td>Epsilon epsilon EPSILON eps &#949; "" ''</td><td>S = 'a' S | Epsilon</td></tr>
+<tr><td>Коментарий</td><td>(* *)</td><td>(* Это коментарий *)</td></tr>
 </table>
 
 As is the norm in EBNF notation, concatenation has a higher precedence than alternation, so in the absence of parentheses, something like `A B | C D` means `(A B) | (C D)`.
