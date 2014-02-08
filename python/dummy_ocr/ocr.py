@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys, re
+import os, sys, re
 from PIL import Image
 
 __author__ = 'Lemeshev Andrey'
@@ -22,7 +22,7 @@ PATTERNS = {
     ':': 'colon.png'
 }
 
-PATTERNS_PATH = './patterns/'
+PATTERNS_PATH = 'patterns'
 
 PATTERN_WIDTH = 6
 PATTERN_HEIGHT = 6
@@ -32,6 +32,9 @@ REGION_Y_COORD = 432
 REGION_WIDTH = 400
 REGION_HEIGHT = 288
 
+def module_path(rel_path):
+    return os.getcwd() + \
+            os.sep + rel_path + os.sep
 
 def load_bw_image(path):
     col = Image.open(path)
@@ -44,7 +47,7 @@ def load_patterns():
     patterns = {}
 
     for pattern in PATTERNS:
-        patterns[pattern] = load_bw_image(PATTERNS_PATH + PATTERNS[pattern])
+        patterns[pattern] = load_bw_image(module_path(PATTERNS_PATH) + PATTERNS[pattern])
 
     return patterns
 
