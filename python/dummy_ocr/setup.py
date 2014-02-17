@@ -6,32 +6,32 @@ if sys.platform == "win32":
     base = "Console"
 
 build_exe_options = {
+    "base": base,
     "compressed" : True,
-    "create_shared_zip" : False,
+    "create_shared_zip" : True,
     "packages": ["os", "sys", "re", "PIL"],
+    "excludes": ["tcl", "Tkconstants", "Tkinter"],
     "include_files" : [
-        'patterns/0.png',
-        'patterns/1.png',
-        'patterns/2.png',
-        'patterns/3.png',
-        'patterns/4.png',
-        'patterns/5.png',
-        'patterns/6.png',
-        'patterns/7.png',
-        'patterns/8.png',
-        'patterns/9.png',
-        'patterns/dot.png',
-        'patterns/colon.png'
+        "patterns/0.png",
+        "patterns/1.png",
+        "patterns/2.png",
+        "patterns/3.png",
+        "patterns/4.png",
+        "patterns/5.png",
+        "patterns/6.png",
+        "patterns/7.png",
+        "patterns/8.png",
+        "patterns/9.png",
+        "patterns/dot.png",
+        "patterns/colon.png"
     ]
 }
 
-WIN_Target = cxExecutable(
-    script='ocr.py',
-    base=base,
-    targetName='ocr.exe',
-    compress=True,
-    appendScriptToLibrary=False,
-    appendScriptToExe=True)
+WIN_Target = cxExecutable(script = "ocr.py",
+    targetName = "ocr.exe",
+    compress = True,
+    appendScriptToLibrary = False,
+    appendScriptToExe = True)
 
 setup(  name = "dummy_ocr",
         version = "0.0.1",
